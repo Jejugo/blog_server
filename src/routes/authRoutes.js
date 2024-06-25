@@ -19,11 +19,9 @@ router.post("/register", async (req, res) => {
     res.status(201).json(response);
   } catch (error) {
     if (error.message === "Email and password are required") {
-      res.status(400).json({ message: error.message });
+      res.status(400).json({ message: error.message, error });
     } else {
-      res
-        .status(500)
-        .json({ message: error.message, error: error.errorMessage });
+      res.status(500).json({ message: error.message, error });
     }
   }
 });
@@ -34,7 +32,7 @@ router.post("/login", async (req, res) => {
 
   try {
     const response = await loginUser(email, password);
-    
+
     res.status(200).json(response);
   } catch (error) {
     if (
