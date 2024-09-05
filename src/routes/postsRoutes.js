@@ -12,8 +12,6 @@ router.get("/recents", (req, res) => {
     posts: posts,
     lastPage: lastPage,
   });
-  // considerando que a página seja N e queremos dois itens por página
-  // utilizaremos a função (n * 2 - 2) e (n * 2 - 1) para retornar os indices de cada pagina
 });
 
 export default router;
