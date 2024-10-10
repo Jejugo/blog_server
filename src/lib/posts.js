@@ -1,14 +1,20 @@
-import { recentPosts } from "../mocks/index.js";
+import { posts } from "../mocks/index.js";
+import { getPostsByPage } from "../lib/utils.js";
+
+const MAX_NUMBER_OF_RECENT_POSTS = 2;
 export const getRecentPosts = (page) => {
-  const size = recentPosts.length;
-  let posts = [];
+  let recentPosts = getPostsByPage({
+    posts,
+    page,
+    limit: MAX_NUMBER_OF_RECENT_POSTS,
+  });
 
-  if (page * 2 - 2 < size) {
-    posts.push(recentPosts[page * 2 - 2]);
-  }
-  if (page * 2 - 1 < size) {
-    posts.push(recentPosts[page * 2 - 1]);
-  }
+  return { posts: recentPosts, lastPage: Math.ceil(posts.length / 2) };
+};
 
-  return { posts, lastPage: Math.ceil(recentPosts.length / 2) };
+export const getCategoryPosts = (category, page, limit) => {
+  const filteredPosts = posts.filter((post) => post.category === category);
+  const categoryPosts = getPostsByPage({ posts: filteredPosts, page, limit });
+
+  return { posts: categoryPosts };
 };
