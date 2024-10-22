@@ -18,8 +18,8 @@ router.get("/recents", (req, res) => {
 router.get("/", (req, res) => {
   const { posts } = getCategoryPosts(
     req.query.category,
-    req.query.page,
-    req.query.limit || 2
+    Number(req.query.page),
+    Number(req.query.limit) || 2
   );
 
   res.status(200).json({

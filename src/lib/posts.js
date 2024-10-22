@@ -13,7 +13,9 @@ export const getRecentPosts = (page) => {
 };
 
 export const getCategoryPosts = (category, page, limit) => {
-  const filteredPosts = posts.filter((post) => post.category === category);
+  const filteredPosts = posts.filter(
+    (post) => post.category.toLowerCase() === category.toLowerCase()
+  );
   const categoryPosts = getPostsByPage({ posts: filteredPosts, page, limit });
 
   return { posts: categoryPosts };
