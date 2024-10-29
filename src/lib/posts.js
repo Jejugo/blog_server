@@ -20,3 +20,8 @@ export const getCategoryPosts = (category, page, limit) => {
 
   return { posts: categoryPosts };
 };
+
+export const getPostById = (id) => {
+  const post = posts.find((post) => post.id === Number(id));
+  return post;
+};
