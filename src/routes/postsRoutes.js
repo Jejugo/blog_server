@@ -1,5 +1,5 @@
 import express from "express";
-import { getRecentPosts, getCategoryPosts } from "../lib/posts.js";
+import { getRecentPosts, getCategoryPosts, getPostById } from "../lib/posts.js";
 
 const router = express.Router();
 
@@ -26,6 +26,12 @@ router.get("/", (req, res) => {
     message: `This is a test of category: ${req.query.category}`,
     posts: posts,
   });
+});
+
+router.get("/:id", (req, res) => {
+  const post = getPostById(req.params.id);
+
+  res.status(200).json({ post });
 });
 
 export default router;
