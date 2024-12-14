@@ -6,13 +6,7 @@ import { runMysqlQuery } from "../helpers/mysql.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-const findUserWithGoogleId = (googleId, email, username) => {
-  return runMysqlQuery(
-    db,
-    "SELECT * FROM User WHERE google_id = ? AND email = ? AND username = ?",
-    [googleId, email, username]
-  );
-};
+const USERS_TABLE = "users";
 
 const generateJWT = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -27,12 +21,20 @@ export async function registerUser(email, password, username) {
     throw new Error("Email and password are required");
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
-
   try {
+    const results = await runMysqlQuery(
+      db,
+      `SELECT * FROM ${USERS_TABLE} WHERE email = ?`,
+      [email]
+    );
+
+    if (results.length) throw new Error("Email already exists");
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     await runMysqlQuery(
       db,
-      "INSERT INTO User (email, password_hash, username) VALUES (?, ?, ?)",
+      `INSERT INTO ${USERS_TABLE} (email, password_hash, username) VALUES (?, ?, ?)`,
       [email, hashedPassword, username]
     );
 
@@ -53,7 +55,7 @@ export async function loginUser(email, password) {
   try {
     const results = await runMysqlQuery(
       db,
-      "SELECT * FROM User WHERE email = ?",
+      `SELECT * FROM ${USERS_TABLE} WHERE email = ?`,
       [email]
     );
 
@@ -75,7 +77,7 @@ export async function loginUser(email, password) {
       expiresIn: "1h",
     });
 
-    return { token };
+    return { token, email };
   } catch (error) {
     throw error;
   }
@@ -91,15 +93,12 @@ export async function googleLogin(token) {
     });
 
     const payload = ticket.getPayload();
-    const googleId = payload.sub;
-    const email = payload.email;
-    const username = payload.name;
 
-    const token = findUserWithGoogleId(googleId, email, username);
+    const { sub: googleId, email, name: username } = payload;
 
     const usersWithGoogleId = await runMysqlQuery(
       db,
-      "SELECT * FROM User WHERE google_id = ?",
+      `SELECT * FROM ${USERS_TABLE} WHERE google_id = ?`,
       [googleId]
     );
 
@@ -108,22 +107,22 @@ export async function googleLogin(token) {
 
       const jwtToken = generateJWT(user.id);
 
-      return { token: jwtToken };
+      return { token: jwtToken, email, username };
     } else {
       const newUser = { google_id: googleId, email, username };
 
       const insertUserResult = await runMysqlQuery(
         db,
-        "INSERT INTO User SET ?",
+        `INSERT INTO ${USERS_TABLE} SET ?`,
         [newUser]
       );
 
       const jwtToken = generateJWT(insertUserResult.insertId);
 
-      return { token: jwtToken };
+      return { token: jwtToken, email, username };
     }
   } catch (error) {
     console.error(error);
-    throw new Error("Invalid Google token");
+    throw new Error(error.sqlMessage || error.message);
   }
 }

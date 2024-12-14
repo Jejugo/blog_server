@@ -48,7 +48,6 @@ router.post("/login", async (req, res) => {
 
 router.post("/google/callback", async (req, res) => {
   const { token } = req.body;
-
   try {
     const response = await googleLogin(token);
     res.status(200).json(response);
