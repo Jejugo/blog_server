@@ -1,5 +1,10 @@
 import express from "express";
-import { getRecentPosts, getCategoryPosts, getPostById } from "../lib/posts.js";
+import {
+  getRecentPosts,
+  getCategoryPosts,
+  getPostById,
+  createPost,
+} from "../lib/posts.js";
 
 const router = express.Router();
 
@@ -28,10 +33,22 @@ router.get("/", (req, res) => {
   });
 });
 
-router.get("/:id", (req, res) => {
-  const post = getPostById(req.params.id);
+router.get("/:id", async (req, res) => {
+  const post = await getPostById(req.params.id);
 
   res.status(200).json({ post });
+});
+
+router.post("/", async (req, res) => {
+  const post = req.body;
+  console.log("bateu", post);
+
+  try {
+    await createPost(post);
+    res.status(201).json({ message: "Post created", post });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 export default router;
