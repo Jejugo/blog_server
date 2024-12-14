@@ -35,13 +35,11 @@ router.get("/", (req, res) => {
 
 router.get("/:id", async (req, res) => {
   const post = await getPostById(req.params.id);
-
   res.status(200).json({ post });
 });
 
 router.post("/", async (req, res) => {
   const post = req.body;
-  console.log("bateu", post);
 
   try {
     await createPost(post);

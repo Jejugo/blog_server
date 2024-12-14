@@ -4,6 +4,7 @@ import cors from "cors";
 import { authenticateToken } from "./middleware/authentication.js";
 import authRoutes from "./routes/authRoutes.js";
 import postsRoutes from "./routes/postsRoutes.js";
+import commentsRoutes from "./routes/commentsRoutes.js";
 import multer from "multer";
 import admin from "./firebase/index.js";
 
@@ -17,6 +18,7 @@ app.use(cors());
 
 app.use("/auth", authRoutes);
 app.use("/posts", postsRoutes);
+app.use("/comments", commentsRoutes);
 
 // Secure route
 app.get("/api/secure-data", authenticateToken, (req, res) => {
